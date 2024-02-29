@@ -20,16 +20,17 @@ class Player(Bot):
         community_cards = round_state.community_cards if hasattr(round_state, 'community_cards') else []
 
         hand_strength = self.evaluate_hand_strength(my_hand + community_cards)
+        print(hand_strength)
 
-        if CheckAction in legal_actions:
-            # Prefer to check if possible to stay in the game without additional cost.
-            return CheckAction()
-        elif RaiseAction in legal_actions and hand_strength >= 3:
+        if RaiseAction in legal_actions and hand_strength >= 2:
             # Raise only with a strong hand (e.g., a pair or better in this simplistic evaluation).
             return RaiseAction(min(round_state.raise_bounds()[1], 100))  # Raise by 100 or max allowed
-        elif CallAction in legal_actions and hand_strength >= 2:
+        elif CallAction in legal_actions and hand_strength >= 1:
+            
             # Call with a decent hand (at least a high card by this evaluation's standards).
             return CallAction()
+        elif CheckAction in legal_actions:
+            return CheckAction()
         return FoldAction()  # Fold as a last resort if the hand is really weak.
 
     def evaluate_hand_strength(self, cards):
@@ -46,10 +47,9 @@ class Player(Bot):
                 score += 6  # Three-of-a-kind
             elif count == 4:
                 score += 12  # Four-of-a-kind
-
-        # Consider high cards as a minimal strength
+                
         high_cards = sum(1 for rank, count in rank_counts.items() if count == 1 and rank in 'TJQKA')
-        score += high_cards * 0.5  # Slight increase for high cards
+        score += high_cards * 0.5  
 
         return score
 
